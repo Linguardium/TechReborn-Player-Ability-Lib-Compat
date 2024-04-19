@@ -36,7 +36,10 @@ dependencies {
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 	modImplementation include("io.github.ladysnake:PlayerAbilityLib:${pal_version}")
+
+	modImplementation "curse.maven:reborncore-237903:${project.reborncore_version}"
 	modImplementation "curse.maven:techreborn-233564:${project.techreborn_version}"
+	modImplementation("teamreborn:energy:${project.energyapi_version}")
 	
 }
 
