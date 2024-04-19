@@ -1,68 +1,53 @@
 package mod.linguardium.trpal.mixin;
 
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import io.github.ladysnake.pal.AbilitySource;
-import io.github.ladysnake.pal.Pal;
-import io.github.ladysnake.pal.VanillaAbilities;
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ArmorMaterial;
 import net.minecraft.item.ItemStack;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Identifier;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import reborncore.common.powerSystem.RcEnergyTier;
 import techreborn.items.armor.QuantumSuitItem;
+import techreborn.items.armor.TREnergyArmourItem;
+
+import static mod.linguardium.trpal.QuantumChestplatePAL.flightTick;
+import static mod.linguardium.trpal.QuantumChestplatePAL.onUnequip;
 
 @Mixin(QuantumSuitItem.class)
-public abstract class QuantumSuitArmorMixin extends ArmorItem {
-	@Unique
-	private static final Identifier QUANTUM_ARMOR_FLIGHT_ABILITY_SOURCE_ID = new Identifier("techreborn", "quantum_armor");
-	@Unique
-	private static final AbilitySource TECHREBORN_QUANTUM_ARMOR_ABILITY_SOURCE = Pal.getAbilitySource(QUANTUM_ARMOR_FLIGHT_ABILITY_SOURCE_ID, AbilitySource.RENEWABLE);
+public abstract class QuantumSuitArmorMixin extends TREnergyArmourItem {
 
-	public QuantumSuitArmorMixin(ArmorMaterial material, Type type, Settings settings) {
-		super(material, type, settings);
+	public QuantumSuitArmorMixin(ArmorMaterial material, Type slot, long maxCharge, RcEnergyTier energyTier) {
+		super(material, slot, maxCharge, energyTier);
 	}
 
-	@WrapOperation(
+	@ModifyExpressionValue(
 			method="tickArmor",
-			at=@At(value= "FIELD", opcode = Opcodes.PUTFIELD ,target = "Lnet/minecraft/entity/player/PlayerAbilities;allowFlying:Z")
+			at= @At(value = "FIELD",
+					opcode = Opcodes.GETSTATIC,
+					target = "Ltechreborn/config/TechRebornConfig;quantumSuitEnableFlight:Z",
+					remap = false)
 	)
-	private void usePALForFlight(PlayerAbilities instance, boolean allow, Operation<Void> original, ItemStack stack, PlayerEntity playerEntity) {
-		if (allow) {
-			allowFlying(playerEntity);
-		}else{
-			dontAllowFlying(playerEntity);
-		}
+	private boolean redirectFlightLogic(boolean flightConfigurationEnabled, ItemStack stack, PlayerEntity player) {
+		flightTick(flightConfigurationEnabled, player,stack,this);
+		// disable original code
+		return false;
 	}
 
-	@Inject(method="onRemoved", at=@At("HEAD"))
-	private void removeFlightAbilityOnUnequip(PlayerEntity playerEntity, CallbackInfo ci) {
+
+	@ModifyExpressionValue(
+			method="onRemoved",
+			at= @At(value = "FIELD",
+					opcode = Opcodes.GETSTATIC,
+					target = "Ltechreborn/config/TechRebornConfig;quantumSuitEnableFlight:Z",
+					remap = false)
+	)
+	private boolean removeFlightAbilityOnUnequip(boolean quantumSuitEnableFlight, PlayerEntity player) {
 		if (this.getSlotType() == EquipmentSlot.CHEST) {
-			dontAllowFlying(playerEntity);
+			onUnequip(player);
+			// disable original code
 		}
+		return false;
 	}
-
-	@Unique
-	private static void allowFlying(PlayerEntity playerEntity) {
-		if (!playerEntity.getWorld().isClient()) {
-			TECHREBORN_QUANTUM_ARMOR_ABILITY_SOURCE.grantTo(playerEntity, VanillaAbilities.ALLOW_FLYING);
-		}
-	}
-
-	@Unique
-	private static void dontAllowFlying(PlayerEntity playerEntity) {
-		if (!playerEntity.getWorld().isClient()) {
-			TECHREBORN_QUANTUM_ARMOR_ABILITY_SOURCE.revokeFrom(playerEntity, VanillaAbilities.ALLOW_FLYING);
-		}
-	}
-
 }
