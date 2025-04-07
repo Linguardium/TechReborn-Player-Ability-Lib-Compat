@@ -1,9 +1,9 @@
 package mod.linguardium.trpal.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Equipment;
 import net.minecraft.item.ItemStack;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
@@ -15,7 +15,7 @@ import static mod.linguardium.trpal.QuantumChestplatePAL.flightTick;
 import static mod.linguardium.trpal.QuantumChestplatePAL.onUnequip;
 
 @Mixin(QuantumSuitItem.class)
-public abstract class QuantumSuitArmorMixin implements Equipment {
+public abstract class QuantumSuitArmorMixin {
 
 	@ModifyExpressionValue(
 			method="tickArmor",
@@ -39,8 +39,8 @@ public abstract class QuantumSuitArmorMixin implements Equipment {
 					target = "Ltechreborn/config/TechRebornConfig;quantumSuitEnableFlight:Z",
 					remap = false)
 	)
-	private boolean removeFlightAbilityOnUnequip(boolean quantumSuitEnableFlight, PlayerEntity player) {
-		if (this.getSlotType() == EquipmentSlot.CHEST) {
+	private boolean removeFlightAbilityOnUnequip(boolean quantumSuitEnableFlight, PlayerEntity player, @Local EquipmentSlot slot) {
+		if (slot == EquipmentSlot.CHEST) {
 			onUnequip(player);
 		}
 		// disable original code
