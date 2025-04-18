@@ -1,6 +1,8 @@
 package mod.linguardium.trpal.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.sugar.Local;
+import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ArmorMaterial;
@@ -29,8 +31,11 @@ public abstract class QuantumSuitArmorMixin extends TREnergyArmourItem {
 					target = "Ltechreborn/config/TechRebornConfig;quantumSuitEnableFlight:Z",
 					remap = false)
 	)
-	private boolean redirectFlightLogic(boolean flightConfigurationEnabled, ItemStack stack, PlayerEntity player) {
-		flightTick(flightConfigurationEnabled, player,stack,this);
+	private boolean redirectFlightLogic(boolean flightConfigurationEnabled, @Local(argsOnly = true) ItemStack stack, @Local(argsOnly = true) PlayerEntity player) {
+		if (player == null || stack == null) {
+			return flightConfigurationEnabled;
+		}
+		flightTick(flightConfigurationEnabled, player, stack,this);
 		// disable original code
 		return false;
 	}
@@ -43,7 +48,7 @@ public abstract class QuantumSuitArmorMixin extends TREnergyArmourItem {
 					target = "Ltechreborn/config/TechRebornConfig;quantumSuitEnableFlight:Z",
 					remap = false)
 	)
-	private boolean removeFlightAbilityOnUnequip(boolean quantumSuitEnableFlight, PlayerEntity player) {
+	private boolean removeFlightAbilityOnUnequip(boolean quantumSuitEnableFlight, @Local(argsOnly = true) PlayerEntity player) {
 		if (this.getSlotType() == EquipmentSlot.CHEST) {
 			onUnequip(player);
 			// disable original code
