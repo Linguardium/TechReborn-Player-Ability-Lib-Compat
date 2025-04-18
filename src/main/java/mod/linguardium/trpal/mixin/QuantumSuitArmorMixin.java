@@ -44,8 +44,9 @@ public abstract class QuantumSuitArmorMixin implements Equipment {
 	private boolean removeFlightAbilityOnUnequip(boolean quantumSuitEnableFlight, @Local(argsOnly = true) PlayerEntity player) {
 		if (this.getSlotType() == EquipmentSlot.CHEST) {
 			onUnequip(player);
+			// disable original code
+			return false;
 		}
-		// disable original code
-		return false;
+		return quantumSuitEnableFlight;
 	}
 }
