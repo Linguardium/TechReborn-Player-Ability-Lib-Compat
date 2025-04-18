@@ -19,11 +19,12 @@
 		"techreborn-player-ability-lib-compat.mixins.json"
 	],
 	"depends": {
-		"fabricloader": ">=0.15.3",
+		"fabricloader": ">=0.15.6",
 		"minecraft": "1.20.1",
 		"java": ">=17",
+		"mixinextras": ">=0.3.2",
 		"fabric-api": "*",
-		"techreborn": "5.8.x",
+		"techreborn": ">=5.8.9",
 		"playerabilitylib": "1.8.x"
 	}
 }
